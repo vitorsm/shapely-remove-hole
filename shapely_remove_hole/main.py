@@ -65,7 +65,7 @@ def get_before_point(coordinates: List[Tuple[float, float]], point: Tuple[float,
 def get_point_between_1_and_2(point1: Tuple[float, float], point2: Tuple[float, float]) -> Tuple[float, float]:
     increment = [point1[0], point1[1]]
 
-    shift = 0.00000000000001
+    shift = 0.0001
 
     diff0 = point2[0] - point1[0]
     diff1 = point2[1] - point1[1]
@@ -188,13 +188,13 @@ def remove_hole(geom: Polygon) -> Polygon:
     holes_geometry = get_holes_geometry(geom)
     polygon = None
     for hole in holes_geometry:
-        polygon = add_geom1_to_geom2(external, hole)
-        if not polygon.is_valid:
-            polygon = add_geom1_to_geom2(external, hole, True)
-            if not polygon.is_valid:
-                polygon = add_geom1_to_geom2(external, hole, False, True)
-                if not polygon.is_valid:
-                    polygon = add_geom1_to_geom2(external, hole, True, True)
+        for invert_polygon2 in [False, True]:
+            for invert_polygon1 in [False, True]:
+                polygon = add_geom1_to_geom2(external, hole, invert_polygon2, invert_polygon1)
+                if polygon.is_valid:
+                    break
+            if polygon.is_valid:
+                break
 
         external = get_external_polygon(polygon)
 
@@ -202,7 +202,7 @@ def remove_hole(geom: Polygon) -> Polygon:
 
 
 if __name__ == "__main__":
-    geo = load_shape("resources/input4.json")
+    geo = load_shape("resources/input5.json")
     print("will remove holes")
     out = remove_hole(geo)
     print(f"is valid: {out.is_valid}")
